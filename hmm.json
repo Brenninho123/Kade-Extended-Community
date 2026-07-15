@@ -3,7 +3,7 @@
 		{
 			"name": "flixel",
 			"type": "haxelib",
-			"version": "5.9.0"
+			"version": "6.1.2"
 		},
 		{
 			"name": "openfl",
@@ -12,10 +12,8 @@
 		},
 		{
 			"name": "lime",
-			"type": "git",
-			"dir": null,
-			"ref": "master",
-			"url": "https://github.com/FunkinCrew/lime"
+			"type": "haxelib",
+			"version": "8.3.2"
 		},
 		{
 			"name": "flixel-tools",
@@ -25,7 +23,7 @@
 		{
 			"name": "flixel-addons",
 			"type": "haxelib",
-			"version": "3.2.3"
+			"version": "4.0.1"
 		},
 		{
 			"name": "flixel-text-input",
