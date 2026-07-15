@@ -4,37 +4,43 @@
 		"pkgs": [
 			{
 				"name": "flixel",
-				"version": "5.8.0"
+				"version": "6.1.2"
 			},
 			{
 				"name": "openfl",
-				"version": "9.3.4"
+				"version": "9.5.2"
 			},
 			{
 				"name": "lime",
-				"version": "8.1.3"
+				"version": "8.3.2"
 			},
 			{
-				"name": "flixel-tools"
+				"name": "flixel-tools",
+				"version": "1.8.0"
 			},
 			{
-				"name": "flixel-addons"
+				"name": "flixel-addons",
+				"version": "4.0.1"
 			},
 			{
-				"name": "flixel-text-input"
+				"name": "flixel-text-input",
+				"version": "1.1.0"
 			},
 			{
-				"name": "hxcpp-debug-server"
+				"name": "hxcpp-debug-server",
+				"version": "1.2.4"
 			},
 			{
 				"name": "polymod",
 				"link": "https://github.com/swordcube/scriptless-polymod.git"
 			},
 			{
-				"name": "hxvlc"
+				"name": "hxvlc",
+				"version": "1.10.0"
 			},
 			{
-				"name": "hscript"
+				"name": "hscript",
+				"version": "2.5.0"
 			},
 			{
 				"name": "hxdiscord_rpc",
@@ -45,10 +51,12 @@
 				"link": "https://github.com/haxeui/haxeui-core.git"
 			},
 			{
-				"name": "hxcpp"
+				"name": "hxcpp",
+				"version": "4.3.2"
 			},
 			{
-				"name": "thx.semver"
+				"name": "thx.semver",
+				"version": "0.1.6"
 			},
 			{
 				"name": "thx.core",
