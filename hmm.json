@@ -1,0 +1,115 @@
+{
+	"dependencies": [
+		{
+			"name": "flixel",
+			"type": "haxelib",
+			"version": "5.9.0"
+		},
+		{
+			"name": "openfl",
+			"type": "haxelib",
+			"version": "9.5.2"
+		},
+		{
+			"name": "lime",
+			"type": "haxelib",
+			"version": "8.3.2"
+		},
+		{
+			"name": "flixel-tools",
+			"type": "haxelib",
+			"version": "1.8.0"
+		},
+		{
+			"name": "flixel-addons",
+			"type": "haxelib",
+			"version": "3.2.3"
+		},
+		{
+			"name": "flixel-text-input",
+			"type": "haxelib",
+			"version": "1.1.0"
+		},
+		{
+			"name": "hxcpp-debug-server",
+			"type": "haxelib",
+			"version": "1.2.4"
+		},
+		{
+			"name": "polymod",
+			"type": "git",
+			"dir": null,
+			"ref": "master",
+			"url": "https://github.com/swordcube/scriptless-polymod.git"
+		},
+		{
+			"name": "hxvlc",
+			"type": "haxelib",
+			"version": "1.10.0"
+		},
+		{
+			"name": "hscript",
+			"type": "haxelib",
+			"version": "2.5.0"
+		},
+		{
+			"name": "hxdiscord_rpc",
+			"type": "git",
+			"dir": null,
+			"ref": "master",
+			"url": "https://github.com/MAJigsaw77/hxdiscord_rpc.git"
+		},
+		{
+			"name": "haxeui-core",
+			"type": "git",
+			"dir": null,
+			"ref": "master",
+			"url": "https://github.com/haxeui/haxeui-core.git"
+		},
+		{
+			"name": "hxcpp",
+			"type": "haxelib",
+			"version": "4.3.2"
+		},
+		{
+			"name": "thx.semver",
+			"type": "haxelib",
+			"version": "0.1.6"
+		},
+		{
+			"name": "thx.core",
+			"type": "git",
+			"dir": null,
+			"ref": "master",
+			"url": "https://github.com/fponticelli/thx.core.git"
+		},
+		{
+			"name": "linc_luajit",
+			"type": "git",
+			"dir": null,
+			"ref": "master",
+			"url": "https://github.com/superpowers04/linc_luajit"
+		},
+		{
+			"name": "hscript-improved",
+			"type": "git",
+			"dir": null,
+			"ref": "master",
+			"url": "https://github.com/FNF-CNE-Devs/hscript-improved.git"
+		},
+		{
+			"name": "moonchart",
+			"type": "git",
+			"dir": null,
+			"ref": "master",
+			"url": "https://github.com/MaybeMaru/moonchart.git"
+		},
+		{
+			"name": "haxeui-flixel",
+			"type": "git",
+			"dir": null,
+			"ref": "master",
+			"url": "https://github.com/haxeui/haxeui-flixel.git"
+		}
+	]
+}
