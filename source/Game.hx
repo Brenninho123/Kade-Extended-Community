@@ -6,9 +6,6 @@ import lime.math.Rectangle;
 import flixel.graphics.tile.FlxDrawBaseItem;
 import flixel.FlxGame;
 
-// https://github.com/FNF-CNE-Devs/CodenameEngine/blob/main/source/funkin/backend/system/FunkinGame.hx
-// Credits to this peeps.
-// DO NOT TOUCH ANYTHING.
 class Game extends FlxGame
 {
 	var skipNextTickUpdate:Bool = false;
@@ -22,7 +19,6 @@ class Game extends FlxGame
 
 	public override function switchState()
 	{
-		// Basic reset stuff
 		FlxG.cameras.reset();
 		FlxG.inputs.onStateSwitch();
 		#if FLX_SOUND_SYSTEM
@@ -35,11 +31,9 @@ class Game extends FlxGame
 		FlxRandom.updateStateSeed();
 		#end
 
-		// Destroy the old state (if there is an old state)
 		if (_state != null)
 			_state.destroy();
 
-		// Finally assign and create the new state
 		_state = _nextState.createInstance();
 		_state._constructor = _nextState;
 		_nextState = null;
@@ -72,7 +66,6 @@ class Game extends FlxGame
 		super.onEnterFrame(t);
 	}
 
-	// Get rid of hit test function because mouse memory ramp up during first move (-Bolo)
 	@:noCompletion private override function __hitTest(x:Float, y:Float, shapeFlag:Bool, stack:Array<DisplayObject>, interactiveOnly:Bool,
 			hitObject:DisplayObject):Bool
 		return true;
