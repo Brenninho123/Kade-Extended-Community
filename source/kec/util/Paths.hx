@@ -16,15 +16,18 @@ import openfl.utils.Assets as OpenFlAssets;
 import openfl.display3D.textures.Texture;
 import openfl.display.BitmapData;
 import flixel.graphics.frames.FlxBitmapFont;
+#if mobile
+import lime.app.Application;
+#end
 
-/**
- * Rewritten `Paths` To Be A General Asset / File Manager.
- * Some Code Stolen From [DetectiveBaldi's AssetMan](https://github.com/DetectiveBaldi/DEFECTIVE_ENGINE/blob/main/source%2Fcore%2FAssetMan.hx)
- */
 class Paths
 {
 	public static var graphics:Map<String, FlxGraphic>;
 	public static var sounds:Map<String, Sound>;
+
+	#if mobile
+	public static var maxCacheEntries:Int = 40;
+	#end
 
 	public static function initialize()
 	{
@@ -33,12 +36,26 @@ class Paths
 		#if cpp
 		Gc.enable(true);
 		#end
+		#if mobile
+		Application.current.window.onFocusOut.add(onMobileFocusOut);
+		#end
 	}
 
-	// FINDING FILES
+	#if mobile
+	static function onMobileFocusOut():Void
+	{
+		clearCache();
+	}
+	#end
 
 	public static inline function getPath(file:String = '')
+	{
+		#if android
+		return 'assets/shared/${file.toLowerCase()}';
+		#else
 		return 'assets/shared/$file';
+		#end
+	}
 
 	public static inline function file(file:String)
 		return getPath(file);
@@ -100,39 +117,36 @@ class Paths
 		return false;
 	}
 
-	// MISC
-
 	public static function video(file:String)
 		return 'assets/videos/$file';
 
-	// GRAPHICS
-
-	/**
-	 * ### Loads And Returns A Graphic.
-	 * @param path The String Path To Search For
-	 * @param useGPU Force Use / Not Use GPU Rendering. Leave Null For Best Results.
-	 * @return FlxGraphic
-	 */
 	public static function image(path:String, ?useGPU:Bool):FlxGraphic
 	{
 		var img:String = getPath('images/$path.png');
 		if (!OpenFlAssets.exists(img, IMAGE))
 		{
 			Debug.logWarn("Couldn't Find Asset At " + img);
-			// shouldn't override it because flixel will handle it for you incase it's an atlas
 			return null;
 		}
 		if (graphics.exists(path))
 			return graphics[path];
 		final graphic:FlxGraphic = FlxGraphic.fromBitmapData(OpenFlAssets.getBitmapData(img));
 
+		#if mobile
+		useGPU = useGPU != null ? useGPU : true;
+		#else
 		useGPU = useGPU != null ? useGPU : FlxG.save.data.gpuRender;
+		#end
 
 		if (useGPU)
 			graphic.bitmap.disposeImage();
 
 		graphic.persist = true;
 		graphics[path] = graphic;
+
+		#if mobile
+		trimGraphicsCache();
+		#end
 
 		return graphics[path];
 	}
@@ -173,22 +187,31 @@ class Paths
 
 	static public function getSparrowAtlas(key:String, ?gpuRender:Bool)
 	{
+		#if mobile
+		gpuRender = gpuRender != null ? gpuRender : true;
+		#else
 		gpuRender = gpuRender != null ? gpuRender : FlxG.save.data.gpuRender;
+		#end
 		return FlxAtlasFrames.fromSparrow(image(key, gpuRender), file('images/$key.xml'));
 	}
 
-	/**
-	 * Senpai in Thorns uses this instead of Sparrow and IDK why.
-	 */
 	static public function getPackerAtlas(key:String, ?gpuRender:Bool)
 	{
+		#if mobile
+		gpuRender = gpuRender != null ? gpuRender : true;
+		#else
 		gpuRender = gpuRender != null ? gpuRender : FlxG.save.data.gpuRender;
+		#end
 		return FlxAtlasFrames.fromSpriteSheetPacker(image(key, gpuRender), file('images/$key.txt'));
 	}
 
 	static public function getJSONAtlas(key:String, ?library:String, ?gpuRender:Bool)
 	{
+		#if mobile
+		gpuRender = gpuRender != null ? gpuRender : true;
+		#else
 		gpuRender = gpuRender != null ? gpuRender : FlxG.save.data.gpuRender;
+		#end
 		return FlxAtlasFrames.fromTexturePackerJson(image(key, gpuRender), file('images/$key.json'));
 	}
 
@@ -197,15 +220,6 @@ class Paths
 		return FlxBitmapFont.fromAngelCode(image(key), fontXML(key));
 	}
 
-	// SOUND
-
-	/**
-	 * Caches an `openfl.media.Sound` and returns it.
-	 * If the requested file path already exists in the cache, it will NOT be renewed.
-	 * @param path The file path of the sound you want to cache.
-	 * @param soundStreaming Specifies whether this sound should be streamed to reduce RAM usage.
-	 * @return `openfl.media.Sound or String`
-	 */
 	public static function loadSound(path:String, ?soundStreaming:Bool = false, ?returnString:Bool = false):Any
 	{
 		var key:String = getPath('$path.ogg');
@@ -224,6 +238,10 @@ class Paths
 			return sounds[path];
 
 		var output:Sound;
+
+		#if mobile
+		soundStreaming = true;
+		#end
 
 		if (soundStreaming)
 		{
@@ -259,12 +277,6 @@ class Paths
 		return loadSound('songs/$songLowercase', true, returnString);
 	}
 
-	// CACHE CLEANING
-
-	/**
-	 * Removes the specified graphic from the cache.
-	 * @param path The file path of the graphic you want to remove.
-	 */
 	public static function removeGraphic(path:String):Void
 	{
 		if (!graphics.exists(path))
@@ -284,10 +296,6 @@ class Paths
 		graphic = null;
 	}
 
-	/**
-	 * Removes the specified sound from the sound cache.
-	 * @param path The file path of the sound you want to remove.
-	 */
 	public static function removeSound(path:String):Void
 	{
 		if (!sounds.exists(path))
@@ -304,16 +312,11 @@ class Paths
 			}
 		}
 
-		// sound.close();
-
 		OpenFlAssets.cache.removeSound(path);
 
 		sounds.remove(path);
 	}
 
-	/**
-	 * Clears each item from the graphic cache.
-	 */
 	public static function clearGraphics():Void
 	{
 		@:privateAccess
@@ -325,23 +328,30 @@ class Paths
 			removeGraphic(key);
 	}
 
-	/**
-	 * Clears each item from the sound cache.
-	 */
 	public static function clearSounds():Void
 	{
 		for (key => value in sounds)
 			removeSound(key);
 	}
 
+	#if mobile
+	public static function trimGraphicsCache():Void
+	{
+		var entries = [for (key in graphics.keys()) key];
+		if (entries.length <= maxCacheEntries)
+			return;
+
+		var overflow = entries.length - maxCacheEntries;
+		for (i in 0...overflow)
+			removeGraphic(entries[i]);
+	}
+	#end
+
 	public static function runGC()
 	{
 		openfl.system.System.gc();
 	}
 
-	/**
-	 * Clears each item from the graphic and sound caches.
-	 */
 	public static function clearCache():Void
 	{
 		clearGraphics();
