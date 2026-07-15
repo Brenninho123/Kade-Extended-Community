@@ -75,7 +75,6 @@
 	<haxelib name="hscript-improved" if="FEATURE_HSCRIPT" />
 	<haxedef name="hscriptPos" if="FEATURE_HSCRIPT" />
 	<haxelib name="hxcpp-debug-server" if="desktop" />
-	<haxelib name="moonchart" />
 
 	<section if="cpp">
 		<haxelib name="hxvlc" if="VIDEOS" />
