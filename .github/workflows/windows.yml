@@ -23,6 +23,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Enable long paths
+        shell: pwsh
+        run: git config --global core.longpaths true
+
       - name: Setup Haxe
         uses: krdlab/setup-haxe@v1
         with:
@@ -33,14 +37,23 @@ jobs:
         with:
           path: ${{ github.workspace }}\.haxelib
           key: ${{ runner.os }}-haxelib-${{ hashFiles('hmm.json') }}
-          restore-keys: |
-            ${{ runner.os }}-haxelib-
 
       - name: Setup haxelib repository
         run: haxelib setup ${{ github.workspace }}\.haxelib
 
       - name: Install hmm
         run: haxelib install hmm --quiet
+
+      - name: Clean stale git libraries
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path "${{ github.workspace }}\.haxelib" -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+            $gitDir = Join-Path $_.FullName ".current"
+            if (Test-Path $gitDir) {
+              attrib -r "$($_.FullName)\*.*" /s /d
+              Remove-Item -Path $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
+            }
+          }
 
       - name: Install dependencies via hmm
         run: haxelib run hmm install --quiet
