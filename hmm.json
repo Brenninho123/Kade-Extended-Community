@@ -96,13 +96,6 @@
 			"url": "https://github.com/FNF-CNE-Devs/hscript-improved.git"
 		},
 		{
-			"name": "moonchart",
-			"type": "git",
-			"dir": null,
-			"ref": "master",
-			"url": "https://github.com/MaybeMaru/moonchart.git"
-		},
-		{
 			"name": "haxeui-flixel",
 			"type": "git",
 			"dir": null,
