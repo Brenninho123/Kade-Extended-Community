@@ -1,4 +1,4 @@
-## **Kade Engine Community (Mobile Port)**
+## **Kade Extended Community**
 ![Kade Engine logo](assets/shared/images/KEClogoP.png)
 
 ## **Engine Is No Longer In Active Development**
