@@ -60,9 +60,6 @@
 	<assets path="assets/fonts" />
 	<assets path="alsoft.ini" />
 
-	<assets path="art/splash/splash_desktop.png" rename="splash.png" if="desktop" />
-	<assets path="art/splash/splash_mobile.png" rename="splash.png" if="mobile" />
-
 	<haxedev set="webgl" />
 	<haxelib name="flixel" />
 	<haxelib name="flixel-addons" />
