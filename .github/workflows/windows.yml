@@ -32,28 +32,14 @@ jobs:
         with:
           haxe-version: 4.3.7
 
-      - name: Cache haxelib dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ github.workspace }}\.haxelib
-          key: ${{ runner.os }}-haxelib-${{ hashFiles('hmm.json') }}
-
       - name: Setup haxelib repository
         run: haxelib setup ${{ github.workspace }}\.haxelib
 
       - name: Install hmm
         run: haxelib install hmm --quiet
 
-      - name: Clean stale git libraries
-        shell: pwsh
-        run: |
-          Get-ChildItem -Path "${{ github.workspace }}\.haxelib" -Directory -ErrorAction SilentlyContinue | ForEach-Object {
-            $gitDir = Join-Path $_.FullName ".current"
-            if (Test-Path $gitDir) {
-              attrib -r "$($_.FullName)\*.*" /s /d
-              Remove-Item -Path $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
-            }
-          }
+      - name: Verify hmm installed
+        run: haxelib list hmm
 
       - name: Install dependencies via hmm
         run: haxelib run hmm install --quiet
