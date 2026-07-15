@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
-	<app title="Kade Engine Community" file="KadeEngineCommunity" packageName="com.therealjake12.kec" package="com.therealjake12.kec" main="Main" version="1.9.4" company="TheRealJake12" />
+	<app file="KadeExtended" packageName="com.therealjake12.kec" package="com.therealjake12.kec" main="Main" version="1.9.4" company="TheRealJake12" />
+	<app title="Friday Night Funkin' Kade Extended" if="desktop" />
+	<app title="FNF: Kade Extended" if="mobile" />
+	<app title="Kade Engine Community" if="!desktop && !mobile" />
+
 	<set name="APP_ID" value="0x0100f6c013bbc000" />
+	<set name="BUILD_NUMBER" value="${BUILD_NUMBER}" />
+	<meta name="build-number" value="${BUILD_NUMBER}" />
+
 	<haxedef name="LINC_LUA_RELATIVE_DYNAMIC_LIB" />
 	<app preloader="flixel.system.FlxPreloader" />
 	<set name="SWF_VERSION" value="11.8" />
+
 	<define name="FEATURE_DISCORD" if="cpp" />
 	<define name="FEATURE_FILESYSTEM" if="cpp" />
 	<define name="FEATURE_LUAMODCHART" if="FEATURE_FILESYSTEM" />
@@ -16,29 +24,45 @@
 	<define name="FEATURE_LOGGING" if="FEATURE_FILESYSTEM" />
 	<define name="CUSTOM_CLASSES" if="FEATURE_HSCRIPT" />
 	<define name="COMPILE_ALL_CLASSES" if="FEATURE_HSCRIPT" />
+	<define name="FEATURE_LOW_MEMORY" if="mobile" />
+
 	<haxedef name="DISCORD_DISABLE_IO_THREAD" />
 	<haxedef name="NO_PRECOMPILED_HEADERS" if="linux" />
+
 	<window width="1280" height="720" fps="60" background="#000000" hardware="true" vsync="false" />
 	<window antialiasing="0" allow-high-dpi="true" />
 	<window if="html5" resizable="true" />
 	<window if="desktop" orientation="landscape" fullscreen="false" resizable="true" vsync="false" />
-	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0" resizable="false" />
+	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0" resizable="false" hardware="true" />
 	<window if="switch" orientation="landscape" fullscreen="true" width="0" height="0" resizable="true" />
+
 	<set name="BUILD_DIR" value="export/debug" if="debug" />
 	<set name="BUILD_DIR" value="export/release" unless="debug" />
 	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
+
+	<architecture name="x64" if="desktop && 64bits" />
+	<architecture name="x86" if="desktop && 32bits" />
+	<architecture name="armv7" if="android" />
+	<architecture name="arm64" if="android" />
+
 	<classpath name="source" />
 	<define name="PRELOAD_ALL" unless="web" />
 	<define name="NO_PRELOAD_ALL" unless="PRELOAD_ALL" />
+
 	<assets path="assets/videos" embed="false" if="VIDEOS" />
 	<assets path="assets/shared" exclude="*.ogg" if="web" />
 	<assets path="assets/shared" exclude="*.mp3" unless="web" />
+	<assets path="assets/shared" exclude="*.mp3|*.ogg" include="*.opus" if="FEATURE_LOW_MEMORY" />
 	<assets path="assets/sm" library="sm" if="FEATURE_STEPMANIA" />
 	<assets path="mods" embed="false" if="FEATURE_MODCORE" />
 	<assets path="art/readme.txt" rename="do NOT readme.txt" />
 	<assets path="LICENSE" rename="LICENSE.txt" />
 	<assets path="assets/fonts" />
 	<assets path="alsoft.ini" />
+
+	<assets path="art/splash/splash_desktop.png" rename="splash.png" if="desktop" />
+	<assets path="art/splash/splash_mobile.png" rename="splash.png" if="mobile" />
+
 	<haxedev set="webgl" />
 	<haxelib name="flixel" />
 	<haxelib name="flixel-addons" />
@@ -52,6 +76,7 @@
 	<haxedef name="hscriptPos" if="FEATURE_HSCRIPT" />
 	<haxelib name="hxcpp-debug-server" if="desktop" />
 	<haxelib name="moonchart" />
+
 	<section if="cpp">
 		<haxelib name="hxvlc" if="VIDEOS" />
 	</section>
@@ -59,6 +84,7 @@
 		<haxedef name="HXVLC_VERBOSE" value="2" />
 		<haxedef name="HXVLC_LOGGING" />
 	</section>
+
 	<haxedef name="FLX_NO_TOUCH" if="desktop" />
 	<haxedef name="FLX_NO_FOCUS_LOST_SCREEN" />
 	<haxedef name="FLX_NO_DEBUG" unless="debug" />
@@ -70,6 +96,7 @@
 	<haxedef name="haxeui_allow_drag_any_component" value="true" />
 	<haxedef name="haxeui_flixel_no_custom_cursors" value="true" />
 	<haxedef name="haxeui_dont_impose_base_class" value="true" />
+
 	<section if="COMPILE_ALL_CLASSES">
 		<haxeflag name="-dce" value="no" />
 		<haxeflag name="--macro" value="ClassMacro.addAdditionalClasses()" />
@@ -78,6 +105,7 @@
 		<haxedef name="HXVLC_NO_SHARE_DIRECTORY" />
 		<haxedef name="HXVLC_OPENAL" />
 	</section>
+
 	<haxedef name="openfl_dpi_aware" unless="web" />
 	<haxedef name="haxeui_focus_out_on_click" />
 	<haxeflag name="--macro" value="include('haxe.ui.backend.flixel.components')" />
@@ -87,6 +115,7 @@
 	<haxeflag name="--macro" value="include('haxe.ui.core')" />
 	<haxeflag name="--macro" value="include('haxe.ui.components')" />
 	<haxeflag name="--macro" value="include('haxe.ui.containers')" />
+
 	<assets path="art/iconOG.png" rename="icon.png" if="linux" />
 	<icon path="art/icon8.png" size="8" />
 	<icon path="art/icon16.png" size="16" />
@@ -107,6 +136,14 @@
 		<config:android permission="android.permission.WRITE_EXTERNAL_STORAGE" />
 		<config:android permission="android.permission.READ_EXTERNAL_STORAGE" />
 		<config:android permission="android.permission.VIBRATE" />
+		<config:android gradle-version="8.4" />
+		<config:android gradle-plugin="8.1.4" />
+		<config:android version-code="${BUILD_NUMBER}" />
+		<config:android keystore="${ANDROID_KEYSTORE_PATH}" if="release" />
+		<config:android alias="${ANDROID_KEY_ALIAS}" if="release" />
+		<config:android password="${ANDROID_KEYSTORE_PASSWORD}" if="release" />
+		<config:android alias-password="${ANDROID_KEY_PASSWORD}" if="release" />
+		<config:android app-category="game" />
 		<haxedef name="FLX_TOUCH_ANDROID" />
 		<haxelib name="extension-androidtools" />
 	</section>
@@ -116,11 +153,21 @@
 		<config:ios device="universal" />
 		<config:ios binary-type="TEXT" />
 		<config:ios extension-availability="16.4" />
+		<config:ios prerendered-icon="true" />
+		<config:ios compiler-flags="-fembed-bitcode" />
+		<config:ios identity="${IOS_SIGNING_IDENTITY}" if="release" />
+		<config:ios team-id="${IOS_TEAM_ID}" if="release" />
+		<config:ios build-number="${BUILD_NUMBER}" />
 		<haxedef name="FLX_TOUCH_IOS" />
 	</section>
 
 	<section if="mobile">
 		<define name="FLX_NO_MOUSE" if="mobile" />
 		<haxedef name="FLX_NO_NATIVE_CURSOR" />
+		<haxedef name="FLX_LOW_QUALITY_ANTIALIASING" />
+	</section>
+
+	<section if="html5">
+		<haxedef name="html5_pixi" />
 	</section>
 </project>
