@@ -43,7 +43,7 @@ jobs:
         run: haxelib install hmm --quiet
 
       - name: Install dependencies via hmm
-        run: haxelib run hmm install
+        run: haxelib run hmm install --quiet
 
       - name: Setup Lime
         run: |
