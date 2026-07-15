@@ -6,7 +6,6 @@ on:
       - master
     paths:
       - 'source/**'
-      - 'assets/**'
       - 'Project.xml'
       - 'hmm.json'
       - '.github/workflows/windows.yml'
@@ -42,7 +41,26 @@ jobs:
         run: haxelib list hmm
 
       - name: Install dependencies via hmm
-        run: haxelib run hmm install --quiet
+        shell: pwsh
+        run: |
+          $maxAttempts = 3
+          $attempt = 1
+          $success = $false
+          while (-not $success -and $attempt -le $maxAttempts) {
+            Write-Host "hmm install attempt $attempt of $maxAttempts"
+            haxelib run hmm install --quiet
+            if ($LASTEXITCODE -eq 0) {
+              $success = $true
+            } else {
+              Write-Host "Attempt $attempt failed, retrying..."
+              $attempt++
+              Start-Sleep -Seconds 5
+            }
+          }
+          if (-not $success) {
+            Write-Error "hmm install failed after $maxAttempts attempts"
+            exit 1
+          }
 
       - name: Setup Lime
         run: |
