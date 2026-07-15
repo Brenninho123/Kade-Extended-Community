@@ -54,10 +54,8 @@
 		},
 		{
 			"name": "hxdiscord_rpc",
-			"type": "git",
-			"dir": null,
-			"ref": "master",
-			"url": "https://github.com/MAJigsaw77/hxdiscord_rpc.git"
+			"type": "haxelib",
+			"version": "1.3.0"
 		},
 		{
 			"name": "haxeui-core",
