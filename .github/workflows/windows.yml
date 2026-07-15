@@ -42,19 +42,8 @@ jobs:
       - name: Install hmm
         run: haxelib install hmm --quiet
 
-      - name: Validate hmm.json
-        run: |
-          echo "Checking hmm.json syntax..."
-          python -c "import json; json.load(open('hmm.json'))"
-          echo "hmm.json is valid JSON."
-
       - name: Install dependencies via hmm
-        id: hmm_install
-        run: haxelib run hmm install --debug
-
-      - name: List installed haxelibs
-        if: always()
-        run: haxelib list
+        run: haxelib run hmm install
 
       - name: Setup Lime
         run: |
