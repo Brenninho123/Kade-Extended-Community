@@ -15,8 +15,7 @@ import lime.app.Application;
 #if VIDEOS
 import hxvlc.util.Handle;
 #end
-#if desktop
-// crash handler stuff
+#if (desktop || mobile)
 import openfl.events.UncaughtErrorEvent;
 import haxe.CallStack;
 import haxe.io.Path;
@@ -25,6 +24,10 @@ import sys.io.File;
 import sys.io.Process;
 import openfl.system.System;
 #end
+#if android
+import openfl.ui.Keyboard;
+import openfl.events.KeyboardEvent;
+#end
 import openfl.utils.AssetCache;
 
 using StringTools;
@@ -32,16 +35,16 @@ using StringTools;
 class Main extends Sprite
 {
 	final game = {
-		width: 1280, // WINDOW width
-		height: 720, // WINDOW height
-		initialState: Init, // initial game state
-		zoom: -1.0, // game state bounds
-		framerate: 60, // default framerate
-		skipSplash: true, // if the default flixel splash screen should be skipped
-		startFullscreen: false // if the game should start at fullscreen mode
+		width: 1280,
+		height: 720,
+		initialState: Init,
+		zoom: -1.0,
+		framerate: 60,
+		skipSplash: true,
+		startFullscreen: false
 	};
 
-	public static var mainClassState:Class<FlxState> = Init; // yoshubs jumpscare (I am aware of *the incident*)
+	public static var mainClassState:Class<FlxState> = Init;
 	public static var focusMusicTween:FlxTween;
 	public static var focused:Bool = true;
 
@@ -50,10 +53,9 @@ class Main extends Sprite
 	var oldVol:Float = 1.0;
 	var newVol:Float = 0.3;
 
-	// You can pretty much ignore everything from here on - your code should go in your states.
 	private var curGame:FlxGame;
 
-	public static var gameContainer:Main = null; // Main instance to access when needed.
+	public static var gameContainer:Main = null;
 
 	public var frameCounter:FrameCounter = null;
 
@@ -69,7 +71,6 @@ class Main extends Sprite
 
 		initHaxeUI();
 
-		// Run this first so we can see logs.
 		kec.backend.Debug.onInitProgram();
 
 		frameCounter = new FrameCounter(10, 3, 0xFFFFFF);
@@ -92,16 +93,28 @@ class Main extends Sprite
 		FlxG.mouse.visible = false;
 		#end
 
+		#if mobile
+		FlxG.mouse.visible = false;
+		FlxG.autoPause = false;
+		#end
+
 		#if VIDEOS
 		Handle.initAsync();
 		#end
 
-		// Finish up loading debug tools.
 		Debug.onGameStart();
-		#if desktop
+
+		#if (desktop || mobile)
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
+		#end
+
+		#if desktop
 		Application.current.window.onFocusOut.add(onWindowFocusOut);
 		Application.current.window.onFocusIn.add(onWindowFocusIn);
+		#end
+
+		#if android
+		stage.addEventListener(KeyboardEvent.KEY_DOWN, onAndroidKeyDown);
 		#end
 	}
 
@@ -131,10 +144,10 @@ class Main extends Sprite
 		{
 			switch status
 			{
-				case 200: // success
+				case 200:
 					hasWifi = true;
 					Debug.logInfo('Connected.');
-				default: // error
+				default:
 					hasWifi = false;
 					Debug.logInfo('No Internet Connection.');
 			}
@@ -149,7 +162,7 @@ class Main extends Sprite
 		http.request();
 	}
 
-	#if desktop
+	#if (desktop || mobile)
 	function onCrash(e:UncaughtErrorEvent):Void
 	{
 		var errMsg:String = "";
@@ -158,7 +171,11 @@ class Main extends Sprite
 		var dateNow:String = Date.now().toString();
 		dateNow = dateNow.replace(" ", "_");
 		dateNow = dateNow.replace(":", "'");
+		#if mobile
+		path = FEATURE_FILESYSTEM ? lime.system.System.applicationStorageDirectory + "/logs/Crashlog " + dateNow + ".txt" : "";
+		#else
 		path = "./logs/" + "Crashlog " + dateNow + ".txt";
+		#end
 		for (stackItem in callStack)
 		{
 			switch (stackItem)
@@ -177,20 +194,27 @@ class Main extends Sprite
 			"\nWoops! We fucked up somewhere! Report this window here : https://github.com/TheRealJake12/Kade-Engine-Community.git\n\n Why dont you join the discord while you're at it? : https://discord.gg/TKCzG5rVGf \n\n> Crash Handler written by: sqirra-rng";
 		Sys.println(errMsg);
 		#if FEATURE_LOGGING
-		if (!FileSystem.exists("./logs/"))
-			FileSystem.createDirectory("./logs/");
-		File.saveContent(path, errMsg + "\n");
-		Sys.println("Crash dump saved in " + Path.normalize(path));
+		if (path != "")
+		{
+			var dir = Path.directory(path);
+			if (!FileSystem.exists(dir))
+				FileSystem.createDirectory(dir);
+			File.saveContent(path, errMsg + "\n");
+			Sys.println("Crash dump saved in " + Path.normalize(path));
+		}
 		#end
+		#if desktop
 		Application.current.window.alert(errMsg, "Error!");
+		#end
 		Sys.exit(1);
 	}
+	#end
 
+	#if desktop
 	function onWindowFocusOut()
 	{
 		focused = false;
 
-		// Lower global volume when unfocused
 		oldVol = FlxG.sound.volume;
 		if (oldVol > 0.3)
 			newVol = 0.3;
@@ -206,8 +230,6 @@ class Main extends Sprite
 			focusMusicTween.cancel();
 		focusMusicTween = FlxTween.tween(FlxG.sound, {volume: newVol}, 0.5);
 
-		// Conserve power by lowering draw framerate when unfocuced
-		// was 30 but it might cause bugs
 		FlxG.drawFramerate = 60;
 	}
 
@@ -218,26 +240,39 @@ class Main extends Sprite
 			focused = true;
 		});
 
-		// Lower global volume when unfocused
-		// Normal global volume when focused
 		if (focusMusicTween != null)
 			focusMusicTween.cancel();
 
 		focusMusicTween = FlxTween.tween(FlxG.sound, {volume: oldVol}, 0.5);
 
-		// Bring framerate back when focused
 		gameContainer.setFPSCap(FlxG.save.data.fpsCap);
+	}
+	#end
+
+	#if android
+	function onAndroidKeyDown(e:KeyboardEvent):Void
+	{
+		if (e.keyCode == Keyboard.BACK)
+		{
+			e.preventDefault();
+			onAndroidBackPressed();
+		}
+	}
+
+	function onAndroidBackPressed():Void
+	{
+		if (Std.isOfType(FlxG.state, MusicBeatState))
+			cast(FlxG.state, MusicBeatState).onAndroidBack();
 	}
 	#end
 
 	function initHaxeUI():Void
 	{
 		Toolkit.init();
-		Toolkit.theme = 'dark'; // don't be cringe
+		Toolkit.theme = 'dark';
 		Toolkit.autoScale = false;
 	}
 
-	// Get rid of hit test function because mouse memory ramp up during first move (-Bolo)
 	@:noCompletion private override function __hitTest(x:Float, y:Float, shapeFlag:Bool, stack:Array<DisplayObject>, interactiveOnly:Bool,
 			hitObject:DisplayObject):Bool
 		return true;
