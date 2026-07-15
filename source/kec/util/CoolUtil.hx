@@ -19,16 +19,18 @@ using StringTools;
 
 class CoolUtil
 {
-	public static var defaultDifficulties:Array<String> = ['Easy', "Normal", "Hard"];
-	public static var suffixDiffsArray:Array<String> = ['-easy', "", "-hard"];
+	public static var defaultDifficulties:Array<String> = ['Easy', 'Normal', 'Hard'];
+	public static var suffixDiffsArray:Array<String> = ['-easy', '', '-hard'];
 
 	public static var customDifficulties:Array<String> = [];
-	public static var defaultDifficulty:String = 'Normal'; // The chart that has no suffix and starting difficulty on Freeplay/Story Mode
-	public static var noteShitArray:Array<String> = ['Alt', 'Hurt', 'Must Press']; // Grabs the custom notetypes (not normal)
+	public static var defaultDifficulty:String = 'Normal';
+	public static var noteShitArray:Array<String> = ['Alt', 'Hurt', 'Must Press'];
 
 	public static var difficulties:Array<String> = getGlobalDiffs();
 
-	public static function formatToSongPath(path:String)
+	public static var daPixelZoom:Float = 6;
+
+	public static function formatToSongPath(path:String):String
 	{
 		return path.toLowerCase().replace(' ', '-');
 	}
@@ -38,16 +40,13 @@ class CoolUtil
 		return difficulties[difficulty];
 	}
 
-	public static function getDifficultyFilePath(num:Null<Int> = null)
+	public static function getDifficultyFilePath(?num:Int):String
 	{
 		if (num == null)
 			num = PlayState.storyDifficulty;
 
 		var fileSuffix:String = difficulties[num];
-		if (fileSuffix != defaultDifficulty)
-			fileSuffix = '-' + fileSuffix;
-		else
-			fileSuffix = '';
+		fileSuffix = fileSuffix != defaultDifficulty ? '-' + fileSuffix : '';
 
 		return formatToSongPath(fileSuffix);
 	}
@@ -59,213 +58,156 @@ class CoolUtil
 
 	static function getGlobalDiffs():Array<String>
 	{
-		var returnArray:Array<String> = [];
-		if (defaultDifficulties.length > 0)
-			for (el in defaultDifficulties)
-				returnArray.push(el);
-
-		if (customDifficulties.length > 0)
-			for (el2 in customDifficulties)
-				returnArray.push(el2);
-
-		return returnArray;
+		var result:Array<String> = [];
+		result = result.concat(defaultDifficulties);
+		result = result.concat(customDifficulties);
+		return result;
 	}
 
-	inline public static function boundTo(value:Float, min:Float, max:Float):Float
+	public static inline function boundTo(value:Float, min:Float, max:Float):Float
 	{
 		return Math.max(min, Math.min(max, value));
 	}
 
-	/**
-	 * Linearly interpolate between two values.
-	 *
-	 * @param base The starting value, when `progress <= 0`.
-	 * @param target The ending value, when `progress >= 1`.
-	 * @param progress Value used to interpolate between `base` and `target`.
-	 * @return The interpolated value.
-	 */
 	public static function lerp(base:Float, target:Float, progress:Float):Float
 	{
 		return base + progress * (target - base);
 	}
 
-	/**
-	 * Perform a framerate-independent linear interpolation between the base value and the target.
-	 * @param current The current value.
-	 * @param target The target value.
-	 * @param elapsed The time elapsed since the last frame.
-	 * @param duration The total duration of the interpolation. Nominal duration until remaining distance is less than `precision`.
-	 * @param precision The target precision of the interpolation. Defaults to 1% of distance remaining.
-	 * @see https://twitter.com/FreyaHolmer/status/1757918211679650262
-	 *
-	 * @return A value between the current value and the target value.
-	 */
-	public static function smoothLerp(current:Float, target:Float, elapsed:Float, duration:Float, precision:Float = 1 / 100):Float
+	public static function smoothLerp(current:Float, target:Float, elapsed:Float, duration:Float, precision:Float = 0.01):Float
 	{
-		// An alternative algorithm which uses a separate half-life value:
-		// var halfLife:Float = -duration / logBase(2, precision);
-		// lerp(current, target, 1 - exp2(-elapsed / halfLife));
-
 		if (current == target)
 			return target;
 
 		var result:Float = lerp(current, target, 1 - Math.pow(precision, elapsed / duration));
 
-		// TODO: Is there a better way to ensure a lerp which actually reaches the target?
-		// Research a framerate-independent PID lerp.
-		if (Math.abs(result - target) < (precision * target))
+		if (Math.abs(result - target) < precision * target)
 			result = target;
 
 		return result;
 	}
 
-	public static function listFromString(string:String):Array<String>
+	public static function listFromString(source:String):Array<String>
 	{
-		var daList:Array<String> = [];
-		daList = string.trim().split('\n');
+		var lines:Array<String> = source.trim().split('\n');
 
-		for (i in 0...daList.length)
-			daList[i] = daList[i].trim();
+		for (i in 0...lines.length)
+			lines[i] = lines[i].trim();
 
-		return daList;
+		return lines;
 	}
 
 	public static function getSuffixFromDiff(diff:String):String
 	{
-		var suffix = '';
-		if (diff != defaultDifficulty)
-			suffix = '-${diff.toLowerCase()}';
-
-		return suffix;
+		return diff != defaultDifficulty ? '-${diff.toLowerCase()}' : '';
 	}
-
-	public static var daPixelZoom:Float = 6;
 
 	public static function camLerpShit(lerp:Float):Float
 	{
 		return lerp * (FlxG.elapsed / (1 / 60));
 	}
 
-	/*
-	 * just lerp that does camLerpShit for u so u dont have to do it every time
-	 */
 	public static function coolLerp(base:Float, target:Float, ratio:Float):Float
 	{
 		return base + camLerpShit(ratio) * (target - base);
 	}
 
-	// taken from heaps
-
-	/**
-		Same as lerp but is scaled based on current FPS, using current elapsed time in seconds.
-	**/
-	public inline static function fpsLerp(a:Float, b:Float, k:Float, dt:Float)
+	public static inline function fpsLerp(a:Float, b:Float, k:Float, dt:Float):Float
 	{
 		return lerp(a, b, 1 - Math.pow(1 - k, dt * FlxG.elapsed));
 	}
 
 	public static function coolTextFile(path:String):Array<String>
 	{
-		var daList:Array<String>;
+		var lines:Array<String>;
 
 		try
 		{
-			daList = OpenFlAssets.getText(path).trim().split('\n');
+			lines = OpenFlAssets.getText(path).trim().split('\n');
 		}
 		catch (e)
 		{
-			daList = null;
+			return null;
 		}
 
-		if (daList != null)
-			for (i in 0...daList.length)
-				daList[i] = daList[i].trim();
+		for (i in 0...lines.length)
+			lines[i] = lines[i].trim();
 
-		return daList;
+		return lines;
 	}
 
-	public static function coolStringFile(path:String):Array<String>
+	public static function coolStringFile(source:String):Array<String>
 	{
-		var daList:Array<String> = path.trim().split('\n');
+		var lines:Array<String> = source.trim().split('\n');
 
-		for (i in 0...daList.length)
-			daList[i] = daList[i].trim();
+		for (i in 0...lines.length)
+			lines[i] = lines[i].trim();
 
-		return daList;
+		return lines;
 	}
 
-	public static function numberArray(max:Int, ?min = 0):Array<Int>
+	public static function numberArray(max:Int, min:Int = 0):Array<Int>
 	{
-		var dumbArray:Array<Int> = [];
+		var result:Array<Int> = [];
 		for (i in min...max)
-			dumbArray.push(i);
-		return dumbArray;
+			result.push(i);
+		return result;
 	}
 
-	inline public static function colorFromString(color:String):FlxColor
+	public static inline function colorFromString(color:String):FlxColor
 	{
-		var hideChars = ~/[\t\n\r]/;
-		var color:String = hideChars.split(color).join('').trim();
-		if (color.startsWith('0x'))
-			color = color.substr(4);
+		var strippedColor:String = ~/[\t\n\r]/g.split(color).join('').trim();
+		if (strippedColor.startsWith('0x'))
+			strippedColor = strippedColor.substr(2);
 
-		var colorNum:Null<FlxColor> = FlxColor.fromString(color);
-		if (colorNum == null)
-			colorNum = FlxColor.fromString('#$color');
-		return colorNum != null ? colorNum : FlxColor.WHITE;
+		var parsedColor:Null<FlxColor> = FlxColor.fromString(strippedColor);
+		if (parsedColor == null)
+			parsedColor = FlxColor.fromString('#$strippedColor');
+
+		return parsedColor != null ? parsedColor : FlxColor.WHITE;
 	}
 
-	/**
-		* Similar to FileSystem.readDirectory() using OpenFLAssets (manifest.json)
-		** WARNING: This function doesn't replace FileSystem.readDirectory(), this only lists the assets that came with the build, 
-		* if you drag new files to the assets folder it won't be detected!
-		** NOTE: Newer files dragged via ModCore/Polymod are detected!
-		* @param path The specific directory you want to read.
-		* @param library The library you want to scan. Ex: shared.
-	 */
-	public static function readAssetsDirectoryFromLibrary(path:String, ?type:String, ?library:String = 'default', ?removePath:Bool = true):Array<String>
+	public static function readAssetsDirectoryFromLibrary(path:String, ?type:String, library:String = 'default', removePath:Bool = true):Array<String>
 	{
 		var lib = LimeAssets.getLibrary(library);
-		var list:Array<String> = lib.list(type);
-		var stringList = [];
-		for (hmm in list)
+		var entries:Array<String> = lib.list(type);
+		var result:Array<String> = [];
+
+		for (entry in entries)
 		{
-			if (hmm.startsWith(path))
-			{
-				var bruh = null;
-				if (removePath)
-					bruh = hmm.replace('$path/', '');
-				else
-					bruh = hmm;
-				stringList.push(bruh);
-			}
+			if (!entry.startsWith(path))
+				continue;
+
+			result.push(removePath ? entry.replace('$path/', '') : entry);
 		}
 
-		stringList.sort(Reflect.compare);
+		result.sort(Reflect.compare);
 
-		return stringList;
+		return result;
 	}
 
-	inline public static function dominantColor(sprite:flixel.FlxSprite):Int
+	public static inline function dominantColor(sprite:flixel.FlxSprite):Int
 	{
-		var countByColor:Map<Int, Int> = [];
+		var countByColor:Map<Int, Int> = new Map();
+
 		for (col in 0...sprite.frameWidth)
 		{
 			for (row in 0...sprite.frameHeight)
 			{
-				var colorOfThisPixel:FlxColor = sprite.pixels.getPixel32(col, row);
-				if (colorOfThisPixel.alphaFloat > 0.05)
-				{
-					colorOfThisPixel = FlxColor.fromRGB(colorOfThisPixel.red, colorOfThisPixel.green, colorOfThisPixel.blue, 255);
-					var count:Int = countByColor.exists(colorOfThisPixel) ? countByColor[colorOfThisPixel] : 0;
-					countByColor[colorOfThisPixel] = count + 1;
-				}
+				var pixel:FlxColor = sprite.pixels.getPixel32(col, row);
+				if (pixel.alphaFloat <= 0.05)
+					continue;
+
+				var solidPixel:FlxColor = FlxColor.fromRGB(pixel.red, pixel.green, pixel.blue, 255);
+				countByColor.set(solidPixel, (countByColor.exists(solidPixel) ? countByColor.get(solidPixel) : 0) + 1);
 			}
 		}
 
-		var maxCount = 0;
-		var maxKey:Int = 0; // after the loop this will store the max color
-		countByColor[FlxColor.BLACK] = 0;
+		countByColor.set(FlxColor.BLACK, 0);
+
+		var maxCount:Int = 0;
+		var maxKey:Int = 0;
+
 		for (key => count in countByColor)
 		{
 			if (count >= maxCount)
@@ -274,11 +216,11 @@ class CoolUtil
 				maxKey = key;
 			}
 		}
-		countByColor = [];
+
 		return maxKey;
 	}
 
-	public static function expDecay(a:Float, b:Float, decay:Float)
+	public static function expDecay(a:Float, b:Float, decay:Float):Float
 	{
 		return b + (a - b) * Math.exp(-decay * FlxG.elapsed);
 	}
